@@ -46,6 +46,8 @@
 #include "hal.h" 		// hardware abstraction layer header
 #include "vex.h"		// vex library header
 
+void setMotors(int speed);
+
 // Digi IO configuration
 static  vexDigiCfg  dConfig[kVexDigital_Num] = {
         { kVexDigital_1,    kVexSensorDigitalOutput, kVexConfigOutput,      0 },
@@ -63,16 +65,16 @@ static  vexDigiCfg  dConfig[kVexDigital_Num] = {
 };
 
 static  vexMotorCfg mConfig[kVexMotorNum] = {
-        { kVexMotor_1,      kVexMotor393T,           kVexMotorNormal,       kVexSensorIME,         kImeChannel_1 },
+        { kVexMotor_1,      kVexMotorUndefined,      kVexMotorReversed,     kVexSensorNone,         0 },
         { kVexMotor_2,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
-        { kVexMotor_3,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
+        { kVexMotor_3,      kVexMotorUndefined,      kVexMotorReversed,     kVexSensorNone,        0 },
         { kVexMotor_4,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
         { kVexMotor_5,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
         { kVexMotor_6,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
         { kVexMotor_7,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
         { kVexMotor_8,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
         { kVexMotor_9,      kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,        0 },
-        { kVexMotor_10,     kVexMotor393T,           kVexMotorNormal,       kVexSensorIME,         kImeChannel_2 }
+        { kVexMotor_10,     kVexMotorUndefined,      kVexMotorNormal,       kVexSensorNone,         0 }
 };
 
 
@@ -126,8 +128,11 @@ vexAutonomous( void *arg )
     return (msg_t)0;
 }
 
-#define MotorDriveL     kVexMotor_1
-#define MotorDriveR     kVexMotor_10
+#define UpperLeftMotor kVexMotor_1
+#define LowerLeftMotor kVexMotor_2
+#define UpperRightMotor kVexMotor_3
+#define LowerRightMotor kVexMotor_4
+
 
 /*-----------------------------------------------------------------------------*/
 /** @brief      Driver control                                                 */
@@ -148,19 +153,8 @@ vexOperator( void *arg )
 	// Run until asked to terminate
 	while(!chThdShouldTerminate())
 		{
-		// flash led/digi out
-		vexDigitalPinSet( kVexDigital_1, (blink++ >> 3) & 1);
 
-		// status on LCD of encoder and sonar
-		vexLcdPrintf( VEX_LCD_DISPLAY_2, VEX_LCD_LINE_1, "%4.2fV   %8.1f", vexSpiGetMainBattery() / 1000.0, chTimeNow() / 1000.0 );
-		vexLcdPrintf( VEX_LCD_DISPLAY_2, VEX_LCD_LINE_2, "L %3d R %3d", vexMotorGet( MotorDriveL ), vexMotorGet( MotorDriveR ) );
-
-		// Tank drive
-		// left drive
-		vexMotorSet( MotorDriveL, vexControllerGet( Ch3 ) );
-
-		// right drive
-		vexMotorSet( MotorDriveR, vexControllerGet( Ch2 ) );
+		setMotors(vexControllerGet(Ch3));// analog control of motors with left joystick y axis
 
 		// Don't hog cpu
 		vexSleep( 25 );
@@ -169,5 +163,16 @@ vexOperator( void *arg )
 	return (msg_t)0;
 }
 
-
+/*-----------------------------------------------------------------------------*/
+/** @brief      Motor Speeds                                                   */
+/*-----------------------------------------------------------------------------*/
+/** @details
+ *  Just sets the speed of each motor
+ */
+void setMotors(int speed){
+	vexMotorSet(UpperRightMotor, speed);
+	vexMotorSet(LowerRightMotor, speed);
+	vexMotorSet(UpperLeftMotor, speed);
+	vexMotorSet(LowerLeftMotor, speed);
+}
 
