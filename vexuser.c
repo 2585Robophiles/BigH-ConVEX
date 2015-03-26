@@ -132,6 +132,7 @@ vexAutonomous( void *arg )
 #define LowerLeftMotor kVexMotor_2
 #define UpperRightMotor kVexMotor_3
 #define LowerRightMotor kVexMotor_4
+#define BUMPER 1
 
 
 /*-----------------------------------------------------------------------------*/
@@ -152,13 +153,18 @@ vexOperator( void *arg )
 
 	// Run until asked to terminate
 	while(!chThdShouldTerminate())
-		{
-
-		setMotors(vexControllerGet(Ch3));// analog control of motors with left joystick y axis
+	{
+		if(vexControllerGet(Btn6U) == 0 && vexControllerGet(Btn6D) == 0)
+			setMotors(vexControllerGet(Ch3));// analog control of motors with left joystick y axis
+		if(vexControllerGet(Btn6D) == 0)
+			setMotors(vexControllerGet(vexControllerGet(Btn6U))*127); // right bumper up
+		else{
+			setMotors(vexControllerGet(-vexControllerGet(Btn6D))*127); // right bumber down
+		}
 
 		// Don't hog cpu
 		vexSleep( 25 );
-		}
+	}
 
 	return (msg_t)0;
 }
