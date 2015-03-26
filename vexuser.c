@@ -128,12 +128,10 @@ vexAutonomous( void *arg )
     return (msg_t)0;
 }
 
-#define UpperLeftMotor kVexMotor_1
-#define LowerLeftMotor kVexMotor_2
-#define UpperRightMotor kVexMotor_3
-#define LowerRightMotor kVexMotor_4
-#define BUMPER 1
-
+#define UpperLeftMotor kVexMotor_2
+#define LowerLeftMotor kVexMotor_3
+#define UpperRightMotor kVexMotor_4
+#define LowerRightMotor kVexMotor_5
 
 /*-----------------------------------------------------------------------------*/
 /** @brief      Driver control                                                 */
@@ -144,8 +142,6 @@ vexAutonomous( void *arg )
 msg_t
 vexOperator( void *arg )
 {
-	int16_t		blink = 0;
-
 	(void)arg;
 
 	// Must call this
@@ -156,7 +152,7 @@ vexOperator( void *arg )
 	{
 		if(vexControllerGet(Btn6U) == 0 && vexControllerGet(Btn6D) == 0)
 			setMotors(vexControllerGet(Ch3));// analog control of motors with left joystick y axis
-		if(vexControllerGet(Btn6D) == 0)
+		else if(vexControllerGet(Btn6D) == 0)
 			setMotors(vexControllerGet(vexControllerGet(Btn6U))*127); // right bumper up
 		else{
 			setMotors(vexControllerGet(-vexControllerGet(Btn6D))*127); // right bumber down
